@@ -1,13 +1,14 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) { exit; }
+if ( ! defined( 'ABSPATH' ) ) { exit; } // Beveiliging: voorkom directe toegang tot dit bestand
+
 
 class CR_Admin {
     protected $assets;
-
+//Registreert admin hooks
     public function __construct( CR_Assets $assets ) {
         $this->assets = $assets;
-        add_action( 'admin_menu', array( $this, 'register_settings_page' ) );
-        add_action( 'admin_init', array( $this, 'register_settings' ) );
+        add_action( 'admin_menu', array( $this, 'register_settings_page' ) ); // Voeg instellingenpagina toe aan het WordPress menu
+        add_action( 'admin_init', array( $this, 'register_settings' ) ); // Voeg instellingenpagina toe aan het WordPress menu
     }
 
     public function register_settings_page() {
@@ -21,7 +22,7 @@ class CR_Admin {
     }
 
     public function register_settings() {
-        register_setting(
+        register_setting(  // API token instelling
             'cr_player_status_group',
             CR_STATUS_OPTION_API_TOKEN,
             array(
@@ -31,7 +32,7 @@ class CR_Admin {
             )
         );
 
-        register_setting(
+        register_setting( 
             'cr_player_status_group',
             CR_STATUS_OPTION_SHOW_CHESTS,
             array(
@@ -41,7 +42,7 @@ class CR_Admin {
             )
         );
 
-        register_setting(
+        register_setting( // Checkbox: battle log aan/uit
             'cr_player_status_group',
             CR_STATUS_OPTION_SHOW_BATTLES,
             array(
@@ -51,14 +52,14 @@ class CR_Admin {
             )
         );
 
-        add_settings_section(
+        add_settings_section( // Instellingen sectie
             'cr_player_status_main_section',
             __( 'API instellingen', 'clash-royale-status' ),
             array( $this, 'render_settings_section_intro' ),
             'cr-player-status'
         );
 
-        add_settings_field(
+        add_settings_field(   // API token veld
             CR_STATUS_OPTION_API_TOKEN,
             __( 'Clash Royale API token', 'clash-royale-status' ),
             array( $this, 'render_field_api_token' ),
@@ -66,7 +67,7 @@ class CR_Admin {
             'cr_player_status_main_section'
         );
 
-        add_settings_field(
+        add_settings_field( // Checkbox veld: chests
             CR_STATUS_OPTION_SHOW_CHESTS,
             __( 'Upcoming chests ophalen', 'clash-royale-status' ),
             array( $this, 'render_field_show_chests' ),
@@ -74,12 +75,19 @@ class CR_Admin {
             'cr_player_status_main_section'
         );
 
-        add_settings_field(
+        add_settings_field( // Checkbox veld: battles
             CR_STATUS_OPTION_SHOW_BATTLES,
             __( 'Battle log ophalen', 'clash-royale-status' ),
             array( $this, 'render_field_show_battles' ),
             'cr-player-status',
             'cr_player_status_main_section'
+        );
+
+        add_settings_section(
+            'cr_player_tag',
+            __( 'Speler tag formaat', 'clash-royale-status' ),
+            array ( $this, 'render_settings_section' ),
+            'cr-player-status',
         );
     }
 
@@ -97,6 +105,17 @@ class CR_Admin {
             <?php esc_html_e( 'Bestandsnaam = chestnaam (kleine letters, streepjes), bv.:', 'clash-royale-status' ); ?>
             <code>silver-chest.png</code>, <code>golden-chest.png</code>, <code>legendary-chest.png</code>.
         </p>
+        <?php
+    }
+
+        public function render_settings_section() {
+            $value = get_option( CR_STATUS_OPTION_API_TOKEN, '' );
+        ?>
+        <input type="text" name="">
+        <p><?php esc_html_e( 'Show Play Name.', 'clash-royale-status' ); ?></p>
+        </p>
+        
+
         <?php
     }
 
@@ -127,6 +146,7 @@ class CR_Admin {
         </label>
         <?php
     }
+
 
     public function render_settings_page() {
         if ( ! current_user_can( 'manage_options' ) ) { return; }

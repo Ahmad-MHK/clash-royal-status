@@ -8,14 +8,16 @@ class CR_Shortcode {
     public function __construct( CR_API $api, CR_Assets $assets ) {
         $this->api    = $api;
         $this->assets = $assets;
-        add_shortcode( 'cr_player_search', array( $this, 'render_player_search_shortcode' ) );
+        add_shortcode( 'cr_player_search', array( $this, 'render_player_search_shortcode' ) ); // Search player 
     }
 
     public function render_player_search_shortcode() {
         ob_start();
 
-        $raw_tag = isset( $_GET['cr_player_tag'] ) ? wp_unslash( $_GET['cr_player_tag'] ) : '';
+        $raw_tag = isset( $_GET['cr_player_tag'] ) ? wp_unslash( $_GET['cr_player_tag'] ) : ''; //  and Data
         $normalized_tag = $this->normalize_player_tag( $raw_tag );
+
+        $this->render_settings_section( array() ); // Always show search form
 
         $this->render_search_form( $raw_tag );
         if ( empty( $normalized_tag ) ) { return ob_get_clean(); }
@@ -34,8 +36,8 @@ class CR_Shortcode {
 
         $this->render_player_info( $player_data );
 
-        $show_chests  = (bool) get_option( CR_STATUS_OPTION_SHOW_CHESTS, 1 );
-        $show_battles = (bool) get_option( CR_STATUS_OPTION_SHOW_BATTLES, 1 );
+        $show_chests  = (bool) get_option( CR_STATUS_OPTION_SHOW_CHESTS, 1 ); //Fliter
+        $show_battles = (bool) get_option( CR_STATUS_OPTION_SHOW_BATTLES, 1 );//Fliter
 
         if ( $show_chests ) {
             $chests_data = $this->api->get( '/players/%23' . rawurlencode( $normalized_tag ) . '/upcomingchests' );
@@ -49,6 +51,8 @@ class CR_Shortcode {
 
         return ob_get_clean();
     }
+
+
 
     protected function render_search_form( $current_tag ) {
         ?>
@@ -65,6 +69,13 @@ class CR_Shortcode {
         if ( strpos( $tag, '#' ) === 0 ) { $tag = substr( $tag, 1 ); }
         $tag = preg_replace( '/[^0289PYLQGRJCUV]/', '', $tag );
         return $tag;
+    }
+
+    protected function render_settings_section() {
+        ?>
+        <p><?php esc_html_e( 'Player', 'clash-royale-status' ); ?></p>
+        <p><?php esc_html_e( 'Show Play Name.', 'clash-royale-status' ); ?></p>
+        <?php
     }
 
     protected function render_player_info( array $player ) {
